@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Exit on error
+set -e
+
+# Install Zsh
+if ! command -v zsh &> /dev/null; then
+    echo "Installing Zsh..."
+    sudo apt update && sudo apt install -y zsh
+else
+    echo "Zsh is already installed."
+fi
+
+# Change default shell to Zsh
+if [ "$SHELL" != "$(command -v zsh)" ]; then
+    echo "Changing default shell to Zsh..."
+    chsh -s "$(command -v zsh)"
+else
+    echo "Zsh is already the default shell."
+fi
+
+# Install Antidote
+ANTIDOTE_PATH="$HOME/.antidote"
+if [ ! -d "$ANTIDOTE_PATH" ]; then
+    echo "Installing Antidote..."
+    git clone --depth=1 https://github.com/mattmc3/antidote.git "$ANTIDOTE_PATH"
+else
+    echo "Antidote is already installed."
+fi
+
+# Add Antidote to .zshrc if not already present
+if ! grep -q "source \$HOME/.antidote/antidote.zsh" "$HOME/.zshrc"; then
+    echo "Configuring Antidote in .zshrc..."
+    echo -e "\n# Load Antidote\nsource \$HOME/.antidote/antidote.zsh\nantidote load" >> "$HOME/.zshrc"
+fi
+
+echo "Installation complete. Restart your terminal or run 'exec zsh' to start using Zsh."
+

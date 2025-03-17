@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+git clone -b v0.10.4 https://github.com/neovim/neovim.git $HOME/personal/neovim
+sudo apt install ninja-build gettext cmake curl build-essential
+
+cd $HOME/personal/neovim
+make CMAKE_BUILD_TYPE=RelWithDebInfo
+sudo make install
+

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Install zsh and antidote
+sudo install -y zsh
+chsh -s "$(command -v zsh)"
+
+ANTIDOTE_PATH="$HOME/.antidote"
+git clone --depth=1 https://github.com/mattmc3/antidote.git "$ANTIDOTE_PATH"
+
+
+# Build and install neovim
+git clone -b v0.10.4 https://github.com/neovim/neovim.git $HOME/personal/neovim
+sudo apt install ninja-build gettext cmake curl build-essential
+cd $HOME/personal/neovim
+make CMAKE_BUILD_TYPE=RelWithDebInfo
+sudo make install
+
+# Install neovim and tpm
+sudo apt install tmux
+git clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
+
+# Install FZF
+git clone git@github.com:junegunn/fzf.git $HOME/personal/fzf
+$HOME/personal/fzf/install
+
+# Install i3
+sudo apt install i3 i3-stataus

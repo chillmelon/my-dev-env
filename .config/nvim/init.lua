@@ -1,0 +1,5 @@
+require 'basic'
+require 'keymaps'
+require 'lazy-bootstrap'
+require 'autocmd'
+require 'plugin'
