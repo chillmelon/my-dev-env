@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-git clone -b v0.10.4 https://github.com/neovim/neovim.git $HOME/personal/neovim
+git clone -b v0.11.2 https://github.com/neovim/neovim.git $HOME/personal/neovim
 sudo apt install ninja-build gettext cmake curl build-essential
 
 cd $HOME/personal/neovim

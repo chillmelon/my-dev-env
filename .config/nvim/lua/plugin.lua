@@ -1,20 +1,13 @@
 require('lazy').setup {
-  -- Color Scheme
-  {
-    'folke/tokyonight.nvim',
-    lazy = false,
-    priority = 1000,
-    init = function()
-      vim.cmd.colorscheme 'tokyonight'
-    end,
-  },
 
-  'preservim/nerdcommenter',
+  require 'plugins.colorscheme',
+  --'preservim/nerdcommenter',
   --'tpope/vim-fugitive',
   'tpope/vim-surround',
   'tpope/vim-repeat',
 
   ---- Essential
+  require 'plugins.comment',
   require 'plugins.nvim-tree',
 
   require 'plugins.autopairs',
@@ -36,6 +29,7 @@ require('lazy').setup {
 
   ---- Note Taking
   --require 'plugins.obsidian',
+  require 'plugins.vimwiki',
 
   ---- Useful
   require 'plugins.telescope',
@@ -45,8 +39,9 @@ require('lazy').setup {
   require 'plugins.todo-comments',
   require 'plugins.which-key',
   require 'plugins.vimtex',
+  require 'plugins.claude-code',
 
-  require 'plugins.avante',
+  --require 'plugins.avante',
 
   ---- Live Coding
   --require("plugins.tidal"),

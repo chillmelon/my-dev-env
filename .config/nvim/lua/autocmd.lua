@@ -23,3 +23,18 @@ autocmd('TextYankPost', {
     }
   end,
 })
+
+local diary_group = augroup('VimwikiDiaryTemplate', {})
+
+autocmd('BufNewFile', {
+  group = diary_group,
+  pattern = '*/vaults/diary/*.md',
+  callback = function(args)
+    local filename = vim.fn.fnamemodify(args.file, ':t')
+    local cmd = string.format("~/personal/scripts/generate-vimwiki-diary-template '%s'", filename)
+    local output = vim.fn.systemlist(cmd)
+    if vim.v.shell_error == 0 then
+      vim.api.nvim_buf_set_lines(args.buf, 0, 0, false, output)
+    end
+  end,
+})
