@@ -1,12 +1,15 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 setopt histignorealldups sharehistory
 
 export VISUAL="nvim"
 export EDITOR=$VISUAL
-export ANTHROPIC_API_KEY=$(ansible-vault view ~/dotfiles/secrets.yml | awk '/api_key:/ {print $2}')
 
-
-# Use emacs keybindings even if our EDITOR is set to vi
-bindkey -e
 
 # Aliases
 alias vim='nvim'
@@ -16,6 +19,7 @@ HISTSIZE=1000
 SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
+
 # Use modern completion system
 autoload -Uz compinit
 compinit
@@ -24,10 +28,10 @@ compinit
 source $HOME/.antidote/antidote.zsh
 antidote load
 
-eval "$(zoxide init zsh)"
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
 
-export TERM=alacritty
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 # NVM
 export NVM_DIR="$HOME/.nvm"
@@ -36,27 +40,41 @@ export NVM_DIR="$HOME/.nvm"
 
 # export PATH="/home/chiyu/miniconda3/bin:$PATH"  # commented out by conda initialize
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
 
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
-
+export PATH="$HOME/personal/scripts:$PATH"
+export PATH="/opt/homebrew/opt/bc/bin:$PATH"
+export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+export PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"
+export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
 
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/yoyo/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/Users/yoyo/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/yoyo/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/yoyo/miniconda3/etc/profile.d/conda.sh"
+    if [ -f "/Users/yoyo/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/Users/yoyo/miniconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/yoyo/miniconda3/bin:$PATH"
+        export PATH="/Users/yoyo/miniconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
+#
+eval "$(zoxide init zsh)"
 
+
+# pnpm
+export PNPM_HOME="/Users/yoyo/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
