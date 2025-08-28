@@ -28,13 +28,13 @@ require('lazy').setup {
   require 'plugins.cmp',
 
   ---- Note Taking
-  --require 'plugins.obsidian',
-  require 'plugins.vimwiki',
+  require 'plugins.obsidian',
+  -- require 'plugins.vimwiki',
 
   ---- Useful
   require 'plugins.telescope',
   require 'plugins.treesitter',
-  --require 'plugins.gitsigns',
+  -- require 'plugins.gitsigns',
   require 'plugins.oil',
   require 'plugins.todo-comments',
   require 'plugins.which-key',

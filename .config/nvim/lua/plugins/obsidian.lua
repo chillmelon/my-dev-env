@@ -23,14 +23,19 @@ return {
     workspaces = {
       {
         name = 'vaults',
-        path = '~/iCloudDrive/iCloud~md~obsidian/vaults',
+        path = '~/vaults',
       },
     },
-    notes_subdir = '0-inbox',
+    templates = {
+      folder = 'templates',
+      date_format = '%Y-%m-%d-%a',
+      time_format = '%H:%M',
+    },
+    notes_subdir = 'inbox',
     new_notes_location = 'notes_subdir',
     note_id_func = function(title)
       local suffix = ''
-      local current_datetime = os.date('!%Y-%m-%d-%H%M%S', os.time() + 8 * 3600)
+      local current_datetime = os.date('!%Y%m%d%H%M', os.time() + 8 * 3600)
       if title ~= nil then
         suffix = title:gsub(' ', '-'):gsub('[^A-Za-z0-9-]', ''):lower()
       else
