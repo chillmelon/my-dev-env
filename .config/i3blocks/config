@@ -5,6 +5,9 @@ markup=none
 [volume-pipewire]
 interval=once
 signal=10
+command=$SCRIPT_DIR/volume-pipewire/volume-pipewire
+click-left = pavucontrol
+click-right = pactl set-sink-mute @DEFAULT_SINK@ toggle && pkill -RTMIN+10 i3blocks
 
 [iface]
 interval=10

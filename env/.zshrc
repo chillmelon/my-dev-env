@@ -42,6 +42,7 @@ export NVM_DIR="$HOME/.nvm"
 
 
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/scripts:$PATH"
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 export PATH="$HOME/personal/scripts:$PATH"
 export PATH="/opt/homebrew/opt/bc/bin:$PATH"
