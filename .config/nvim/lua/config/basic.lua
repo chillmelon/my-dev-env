@@ -13,13 +13,15 @@ vim.o.showmode = false
 vim.opt_local.conceallevel = 1
 
 -- UI
-vim.o.number = true
+vim.opt.nu = true
+vim.opt.relativenumber = true
 vim.o.wrap = false
 vim.o.numberwidth = 4
 vim.o.showtabline = 2
 vim.o.signcolumn = 'yes'
 vim.o.splitbelow = true
 vim.o.splitright = true
+vim.o.winborder = 'rounded'
 
 -- Indention
 vim.o.expandtab = true

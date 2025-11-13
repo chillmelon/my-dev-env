@@ -5,9 +5,9 @@ return {
     config = function()
       local function scstatus()
         if vim.bo.filetype == 'supercollider' then
-          stat = vim.fn['scnvim#statusline#server_status']()
-          stat = stat:gsub('%%', '♪')
-          return stat
+          local sc_stat = vim.fn['scnvim#statusline#server_status']()
+          sc_stat = sc_stat:gsub('%%', '♪')
+          return sc_stat
         else
           return ''
         end
@@ -34,7 +34,16 @@ return {
         sections = {
           lualine_a = { 'mode' },
           lualine_b = { 'branch', 'diff', 'diagnostics' },
-          lualine_c = { 'filename', scstatus },
+          lualine_c = {
+            {
+              'buffers',
+              symbols = {
+                modified = '',
+              },
+            },
+            -- 'filename',
+            scstatus,
+          },
           lualine_x = { 'encoding', 'fileformat', 'filetype' },
           lualine_y = { 'progress' },
           lualine_z = { 'location' },

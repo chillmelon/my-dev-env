@@ -26,7 +26,3 @@ vim.api.nvim_set_keymap('v', '<C-k>', ":m '<-2<CR>gv=gv", { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>gs', ':G<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //3<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>gf', ':diffget //2<CR>', { noremap = true })
-
--- Nvim Tree
-vim.api.nvim_set_keymap('n', '<C-n>', ':NvimTreeToggle<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-f>', ':NvimTreeFindFile<CR>', { noremap = true })
