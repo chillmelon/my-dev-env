@@ -1,0 +1,22 @@
+{
+  "plugins": {
+    "mason.nvim": [],
+    "nvim-autopairs": {
+      "rev": "7a2c97c",
+      "src": "https://github.com/windwp/nvim-autopairs"
+    },
+    "nvim-lspconfig": [],
+    "nvim-treesitter": [],
+    "plenary.nvim": [],
+    "telescope-fzf-native.nvim": {
+      "rev": "6fea601",
+      "src": "https://github.com/nvim-telescope/telescope-fzf-native.nvim"
+    },
+    "telescope-ui-select.nvim": [],
+    "telescope.nvim": {
+      "version": "'0.1.8'"
+    },
+    "tokyonight.nvim": [],
+    "vim-surround": []
+  }
+}

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+git clone https://github.com/zk-org/zk.git $HOME/personal/zk
+cd $HOME/personal/zk
+make build

@@ -20,7 +20,7 @@ require('lazy').setup {
 
   ---- Completion
   require 'plugins.nvim-cmp',
-  require 'plugins.completion',
+  -- require 'plugins.completion',
 
   ---- Note Taking
   -- require 'plugins.obsidian',

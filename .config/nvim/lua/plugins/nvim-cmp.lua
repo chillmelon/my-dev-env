@@ -1,10 +1,10 @@
 return {
-  {
-    'supermaven-inc/supermaven-nvim',
-    config = function()
-      require('supermaven-nvim').setup {}
-    end,
-  },
+  -- {
+  --   'supermaven-inc/supermaven-nvim',
+  --   config = function()
+  --     require('supermaven-nvim').setup {}
+  --   end,
+  -- },
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = { 'InsertEnter', 'CmdlineEnter' },
@@ -109,7 +109,7 @@ return {
           format = function(entry, vim_item)
             -- Add source name for clarity
             vim_item.menu = ({
-              supermaven = '[AI]',
+              -- supermaven = '[AI]',
               nvim_lsp = '[LSP]',
               luasnip = '[Snip]',
               buffer = '[Buf]',
@@ -122,7 +122,7 @@ return {
 
         -- Sources with priorities and options
         sources = cmp.config.sources({
-          { name = 'supermaven', priority = 1000 },
+          -- { name = 'supermaven', priority = 1000 },
           {
             name = 'lazydev',
             group_index = 0,
