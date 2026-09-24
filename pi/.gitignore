@@ -1,0 +1,19 @@
+# Credentials and local runtime data must never enter the snapshot.
+auth.json
+.env
+.env.*
+!.env.example
+/agent/sessions/
+/agent/statusline-transcripts/
+/agent/web-search-cache/
+/agent/tmp/
+/agent/fff/
+/agent/missions/
+/agent/trust.json
+/agent/models-store.json
+/agent/git/
+/agent/npm/
+node_modules/
+__pycache__/
+.venv/
+.pytest_cache/

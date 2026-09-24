@@ -1,0 +1,70 @@
+{
+  "quietStartup": true,
+  "lastChangelogVersion": "0.86.1",
+  "theme": "dark",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-sonnet-5",
+  "defaultThinkingLevel": "high",
+  "compaction": {
+    "enabled": false,
+    "keepRecentTokens": 80000
+  },
+  "packages": [
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:@gotgenes/pi-anthropic-auth",
+    "git:github.com/elpapi42/pi-fork",
+    "npm:pi-rtk-optimizer",
+    "npm:@ff-labs/pi-fff",
+    "npm:pi-web-access",
+    "npm:@tintinweb/pi-subagents",
+    "npm:pi-zentui",
+    "git:git@github.com:elpapi42/pi-codemapper.git",
+    "npm:pi-provider-kimi-code",
+    "git:github.com/obra/superpowers"
+  ],
+  "observational-memory": {
+    "observeAfterTokens": 10000,
+    "compactAfterTokens": 160000,
+    "reflectAfterTokens": 40000,
+    "observationsPoolMaxTokens": 20000,
+    "model": {
+      "provider": "openai-codex",
+      "id": "gpt-5.5"
+    }
+  },
+  "pi-fork": {
+    "environment": {
+      "PI_OBSERVATIONAL_MEMORY_PASSIVE": 1
+    },
+    "costFooter": true,
+    "extensions": [
+      "npm:@gotgenes/pi-anthropic-auth",
+      "git:git@github.com:elpapi42/pi-codemapper.git",
+      "npm:pi-rtk-optimizer",
+      "npm:@ff-labs/pi-fff",
+      "npm:pi-web-access"
+    ],
+    "defaultEffort": "balanced",
+    "effortProfiles": {
+      "fast": {
+        "provider": "anthropic",
+        "id": "claude-haiku-4-5",
+        "thinking": "minimal"
+      },
+      "balanced": {
+        "provider": "anthropic",
+        "id": "claude-sonnet-5",
+        "thinking": "high"
+      },
+      "deep": {
+        "provider": "anthropic",
+        "id": "claude-opus-5",
+        "thinking": "medium"
+      }
+    }
+  },
+  "hideThinkingBlock": true,
+  "warnings": {
+    "anthropicExtraUsage": false
+  }
+}

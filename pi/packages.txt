@@ -1,0 +1,11 @@
+npm:@juicesharp/rpiv-ask-user-question@2.10.1
+npm:@gotgenes/pi-anthropic-auth@3.0.1
+git:github.com/elpapi42/pi-fork@e69725c396030cb9e3b119286beca53f47a2305f
+npm:pi-rtk-optimizer@0.9.0
+npm:@ff-labs/pi-fff@0.10.6
+npm:pi-web-access@0.30.0
+npm:@tintinweb/pi-subagents@0.19.0
+npm:pi-zentui@0.25.0
+git:git@github.com:elpapi42/pi-codemapper.git@a9d9b66acae61fd77acdb05ee31c122eda26b993
+npm:pi-provider-kimi-code@0.6.12
+git:github.com/obra/superpowers@5bf4e78011075bcfc0dc295f0724994cd123ee71

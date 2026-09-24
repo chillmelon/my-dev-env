@@ -1,0 +1,102 @@
+diff --git a/README.md b/README.md
+index 0084bdb..9029198 100644
+--- a/README.md
++++ b/README.md
+@@ -79,10 +79,10 @@ Runs:
+ 
+ ```bash
+ cm stats <path> --format ai
+-cm map <path> --level 2 --format ai
++cm map <path> --format ai
+ ```
+ 
+-Returns a JSON array containing one `stats` item plus `file` items when the level-2 file map fits. If the full file map is too large, the tool returns `stats`, a `notice` item with code `map_output_optimized`, and compact `directory` items. The notice tells the agent to call `map` again with a smaller `path` from the returned directory items when it needs file-level mapping.
++Returns a JSON array containing one `stats` item plus `file` items when the full file map fits. If the full file map is too large, the tool returns `stats`, a `notice` item with code `map_output_optimized`, and compact `directory` items. The notice tells the agent to call `map` again with a smaller `path` from the returned directory items when it needs file-level mapping.
+ 
+ ### `search({ query, path?, exact? })`
+ 
+@@ -159,7 +159,7 @@ Pi tool execution returns Pi’s normal tool result object internally, but the m
+ - `[]` for successful no-result cases,
+ - a plain string error on failure.
+ 
+-For `map`, very large level-2 file maps are still successful JSON responses: the tool returns `stats`, a `notice`, and aggregated `directory` items instead of failing with an output-size error.
++For `map`, very large file maps are still successful JSON responses: the tool returns `stats`, a `notice`, and aggregated `directory` items instead of failing with an output-size error.
+ 
+ There is no wrapper object, no `findings` field, no `commandsRun`, and no relevance score.
+ 
+diff --git a/SPEC.md b/SPEC.md
+index 4712a46..83f9226 100644
+--- a/SPEC.md
++++ b/SPEC.md
+@@ -82,7 +82,7 @@ Command pipeline:
+ 
+ ```bash
+ cm stats <path> --format ai
+-cm map <path> --level 2 --format ai
++cm map <path> --format ai
+ ```
+ 
+ Execution details:
+@@ -90,9 +90,9 @@ Execution details:
+ - Default `path` to `.`.
+ - Run `stats` first, then `map`.
+ - Parse `stats` into one `stats` item.
+-- Parse `map --level 2` into `file` items.
++- Parse `map` into `file` items.
+ - If the full `stats + file` JSON array fits the model-output cap, return it unchanged.
+-- If the full level-2 file map is too large to safely return, return an optimized JSON array instead of a plain string error: `stats` item(s), a `notice` item explaining that the response was optimized because the file map was too large, and top-level `directory` items aggregated from the parsed file items.
++- If the full file map is too large to safely return, return an optimized JSON array instead of a plain string error: `stats` item(s), a `notice` item explaining that the response was optimized because the file map was too large, and top-level `directory` items aggregated from the parsed file items.
+ - The optimized notice must tell the agent to call `map` again with a smaller `path` from the returned directory items when it needs file-level mapping.
+ - If the optimized directory grouping is still too large, include as many largest directory groups as fit plus a second `notice` item explaining that directory groups were truncated.
+ 
+diff --git a/src/mapFallback.ts b/src/mapFallback.ts
+index 8d1d639..64be275 100644
+--- a/src/mapFallback.ts
++++ b/src/mapFallback.ts
+@@ -95,7 +95,7 @@ function createOptimizedNotice(targetPath: string, fileCount: number, directoryC
+ 	return {
+ 		kind: "notice",
+ 		code: "map_output_optimized",
+-		message: `The full level-2 file map for ${targetPath} produced ${fileCount} file items and was too large to return safely, so this response was optimized into ${directoryCount} top-level directory group(s).`,
++		message: `The full file map for ${targetPath} produced ${fileCount} file items and was too large to return safely, so this response was optimized into ${directoryCount} top-level directory group(s).`,
+ 		suggestedAction:
+ 			"If you need file-level mapping, call map again with a smaller path from one of the returned directory.path values.",
+ 	};
+diff --git a/src/tools/map.ts b/src/tools/map.ts
+index b19ba23..7e1aeec 100644
+--- a/src/tools/map.ts
++++ b/src/tools/map.ts
+@@ -13,9 +13,9 @@ export function registerMapTool(pi: ExtensionAPI): void {
+ 		name: "map",
+ 		label: "Map",
+ 		description:
+-			"Map a repository or directory with CodeMapper before choosing files or search terms. Runs `cm stats` plus `cm map --level 2` and returns a JSON array containing one stats item plus file items when the file map fits. If the level-2 file map is too large, map returns stats, a notice, and compact directory groups so the agent can call map again on a smaller returned directory path. Use for repo/package/module orientation such as `.`, `src`, `packages/api`, or `docs`; the path must be a directory scope, not a single file.",
++			"Map a repository or directory with CodeMapper before choosing files or search terms. Runs `cm stats` plus `cm map` and returns a JSON array containing one stats item plus file items when the file map fits. If the full file map is too large, map returns stats, a notice, and compact directory groups so the agent can call map again on a smaller returned directory path. Use for repo/package/module orientation such as `.`, `src`, `packages/api`, or `docs`; the path must be a directory scope, not a single file.",
+ 		promptSnippet:
+-			"map: Repo/directory orientation via CodeMapper stats + level-2 file map; large maps fall back to directory groups.",
++			"map: Repo/directory orientation via CodeMapper stats + file map; large maps fall back to directory groups.",
+ 		promptGuidelines: [
+ 			"Use map first when you do not yet know the relevant files, symbols, or docs sections; it is cheaper than broad ls/find/read.",
+ 			"Use map.path to scope the overview to the smallest useful directory such as `src`, `apps/web`, `packages/api`, or `docs`.",
+@@ -29,7 +29,7 @@ export function registerMapTool(pi: ExtensionAPI): void {
+ 				const stats = await runCm(ctx.cwd, ["stats", targetPath, "--format", "ai"], { signal, timeoutMs: CM_TIMEOUT_MS });
+ 				const fileItems: FileItem[] = [];
+ 				const handleMapLine = createMapLineHandler(fileItems);
+-				await runCmStreamingLines(ctx.cwd, ["map", targetPath, "--level", "2", "--format", "ai"], { signal, timeoutMs: CM_TIMEOUT_MS }, handleMapLine);
++				await runCmStreamingLines(ctx.cwd, ["map", targetPath, "--format", "ai"], { signal, timeoutMs: CM_TIMEOUT_MS }, handleMapLine);
+ 				return toToolResult(buildMapResult(parseStatsOutput(stats.stdout, targetPath), fileItems, targetPath, MAX_MODEL_OUTPUT_BYTES));
+ 			} catch (error) {
+ 				return toToolResult(renderToolFailure(error));
+diff --git a/test/parsers.test.mjs b/test/parsers.test.mjs
+index 68a7f9e..7b8e4f0 100644
+--- a/test/parsers.test.mjs
++++ b/test/parsers.test.mjs
+@@ -48,7 +48,7 @@ test("parseStatsOutput parses compact stats", () => {
+   ]);
+ });
+ 
+-test("parseMapOutput parses level 2 files", () => {
++test("parseMapOutput parses file entries", () => {
+   const items = parseMapOutput(`[PROJECT]\nLANGS: rust:28 markdown:1\nFILES:29 SYMBOLS:681\n\n[FILES]\n./src/blame.rs|rust|7799\n./README.md|markdown|9872`);
+   assert.deepEqual(items, [
+     { kind: "file", path: "./src/blame.rs", language: "rust", sizeBytes: 7799 },
