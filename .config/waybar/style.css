@@ -1,0 +1,87 @@
+/* Nord — "Nordic minimal": greyscale + one accent (frost), aurora only for states.
+   Keep in sync with sway/config.d/00-vars.conf */
+@define-color nord0  #2e3440;  /* polar night: background */
+@define-color nord1  #3b4252;
+@define-color nord3  #4c566a;  /* muted */
+@define-color nord4  #d8dee9;  /* snow storm: text */
+@define-color nord6  #eceff4;  /* brightest text */
+@define-color frost  #88c0d0;  /* the one accent */
+@define-color red    #bf616a;
+@define-color orange #d08770;
+@define-color yellow #ebcb8b;
+
+* {
+    font-family: "BlexMono Nerd Font Propo", monospace;
+    font-size: 13px;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+}
+
+window#waybar {
+    background: @nord0;
+    color: @nord4;
+}
+
+/* Workspaces: no filled blocks, just a thin frost underline on the active one */
+#workspaces button {
+    padding: 0 10px;
+    color: @nord3;
+    background: transparent;
+    box-shadow: inset 0 -2px transparent;
+}
+#workspaces button:hover {
+    color: @nord4;
+    background: transparent;
+    box-shadow: inset 0 -2px @nord3;
+}
+#workspaces button.visible {
+    color: @nord4;
+}
+#workspaces button.focused {
+    color: @nord6;
+    box-shadow: inset 0 -2px @frost;
+}
+#workspaces button.urgent {
+    color: @red;
+    box-shadow: inset 0 -2px @red;
+}
+
+#mode {
+    color: @yellow;
+    padding: 0 10px;
+}
+
+#scratchpad,
+#clock,
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#tray {
+    padding: 0 10px;
+    color: @nord4;
+}
+
+#clock      { color: @nord6; }
+#scratchpad { color: @nord3; }
+
+#custom-power {
+    padding: 0 14px 0 10px;
+    color: @nord4;
+}
+#custom-power:hover { color: @red; }
+
+/* Colour only when something needs attention */
+#network.disconnected { color: @red; }
+#pulseaudio.muted     { color: @nord3; }
+#cpu.warning, #memory.warning   { color: @yellow; }
+#cpu.critical, #memory.critical { color: @red; }
+
+tooltip {
+    background: @nord0;
+    border: 1px solid @nord3;
+}
+tooltip label {
+    color: @nord4;
+}

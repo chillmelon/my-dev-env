@@ -1,0 +1,28 @@
+font=Noto Sans 11
+width=360
+height=110
+margin=12
+padding=14
+border-size=1
+border-radius=6
+
+background-color=#2e3440f2
+text-color=#d8dee9
+border-color=#4c566a
+
+default-timeout=5000
+ignore-timeout=0
+
+[urgency=low]
+border-color=#3b4252
+
+[urgency=normal]
+border-color=#4c566a
+
+[urgency=critical]
+border-color=#bf616a
+default-timeout=0
+
+# Click a Telegram notification: bring Telegram to the current workspace
+[app-name="Telegram Desktop"]
+on-button-left=exec ~/.config/sway/scripts/telegram.sh summon "$id"

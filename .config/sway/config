@@ -1,0 +1,4 @@
+# Distro integration snippets (e.g. 50-systemd-user.conf). 05-session.conf still
+# does its own env import + portal restart sequentially, so ordering is not an issue.
+include /etc/sway/config.d/*
+include ~/.config/sway/config.d/*.conf

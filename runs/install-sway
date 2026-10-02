@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Sway desktop: packages + the system-level bits that `dev-env` (which only syncs
+# ~/.config and ~/.local) can't place. Run `./dev-env` too for the dotfiles:
+#   .config/{sway,waybar,fuzzel,mako,swaylock,ghostty,satty,environment.d,gtk-4.0}
+set -euo pipefail
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+sys="$repo/system/sway"
+
+sudo apt install -y \
+    sway swayidle swaylock waybar fuzzel mako-notifier \
+    grim slurp wl-clipboard cliphist jq libnotify-bin playerctl pavucontrol \
+    xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
+    fcitx5 mate-polkit \
+    qt5-gtk-platformtheme qt6-gtk-platformtheme \
+    fonts-noto-cjk ghostty
+
+# Session launcher: loads ~/.config/environment.d/*.conf (fcitx5, Qt theme, cursor)
+# into sway's own env, then starts sway with --unsupported-gpu. Picked in GDM as "Sway (NVIDIA)".
+sudo install -m 755 "$sys/sway-nvidia" /usr/local/bin/sway-nvidia
+sudo install -m 644 "$sys/sway-nvidia.desktop" /usr/share/wayland-sessions/sway-nvidia.desktop
+
+# GTK3 settings: copied as a single file because ~/.config/gtk-3.0 also holds
+# per-machine bookmarks that dev-env's whole-directory copy would wipe.
+mkdir -p "$HOME/.config/gtk-3.0"
+cp "$sys/gtk-3.0-settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+
+# Dark mode for libadwaita/GTK4 + cursor (keep in sync with environment.d/80-desktop.conf)
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+gsettings set org.gnome.desktop.interface icon-theme 'Yaru-blue-dark'
+gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita'
+gsettings set org.gnome.desktop.interface cursor-size 24
+
+cat <<'EOF'
+Manual steps:
+  - satty (screenshot annotation): https://github.com/Satty-org/Satty/releases -> ~/.local/bin/satty
+  - BlexMono Nerd Font: https://github.com/ryanoasis/nerd-fonts/releases (IBMPlexMono) -> ~/.local/share/fonts, then fc-cache -f
+  - Monitor names in .config/sway/config.d/00-vars.conf ($fm/$sm): check `swaymsg -t get_outputs`
+EOF

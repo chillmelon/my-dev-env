@@ -1,0 +1,10 @@
+#!/bin/sh
+# Session env for sway: load the same files systemd --user reads
+# (~/.config/environment.d/*.conf: fcitx5 IM vars, Qt theme, cursor) so sway
+# and every app it execs get them, instead of GDM/GNOME leftovers (ibus).
+set -a
+for f in "$HOME"/.config/environment.d/*.conf; do
+    [ -r "$f" ] && . "$f"
+done
+set +a
+exec /usr/bin/sway --unsupported-gpu "$@"

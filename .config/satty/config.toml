@@ -1,0 +1,18 @@
+# Satty config — used by ~/.config/sway/scripts/screenshot.sh edit
+# Full reference: `man satty` / https://github.com/Satty-org/Satty#configuration
+# output-filename is passed by screenshot.sh (-o) so it matches the other modes.
+
+[general]
+resize = { mode = "smart" }
+copy-command = "wl-copy"
+# Enter: copy + save + close.  Esc: close without doing anything.
+# Ctrl+C = copy only, Ctrl+S = save only.
+actions-on-enter = ["save-to-clipboard", "save-to-file", "exit"]
+actions-on-escape = ["exit"]
+annotation-size-factor = 1
+corner-roundness = 0
+
+# CJK-capable font so Chinese text annotations render properly
+[font]
+family = "Noto Sans CJK TC"
+style = "Regular"

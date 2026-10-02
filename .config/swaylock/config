@@ -1,0 +1,55 @@
+# swaylock — Nord, Nordic minimal (greyscale + frost accent)
+# 文件: man 5 swaylock
+
+# 背景(與桌布同色,純色);要圖片就改成 image=/path/to.jpg
+color=2e3440
+
+# 空白密碼按 Enter 不送出驗證(不會算一次錯誤)
+ignore-empty-password
+
+# ── 指示環 ──
+# 注意:這是原版 swaylock 1.8,不支援 swaylock-effects 的 indicator / grace / effect-blur 等選項,
+# 寫了會讓整個 swaylock 啟動失敗(=鎖不了螢幕)。改完用這行檢查(不會真的鎖):
+#   WAYLAND_DISPLAY=none swaylock 2>&1 | head -3     → 只該看到 Unable to connect
+# 閒置時也顯示圓環(原版的寫法)
+indicator-idle-visible
+indicator-radius=110
+indicator-thickness=4
+indicator-caps-lock
+
+# 字體
+font=BlexMono Nerd Font
+font-size=24
+
+# ── 顏色 (Nord) ──
+# 一般狀態
+inside-color=2e3440CC
+ring-color=4c566a
+line-color=00000000
+text-color=d8dee9
+separator-color=00000000
+
+# 輸入按鍵高亮
+key-hl-color=88c0d0
+bs-hl-color=bf616a
+
+# 清空(backspace 清掉)
+inside-clear-color=2e3440CC
+ring-clear-color=ebcb8b
+text-clear-color=ebcb8b
+
+# 驗證中
+inside-ver-color=2e3440CC
+ring-ver-color=a3be8c
+text-ver-color=a3be8c
+
+# 密碼錯誤
+inside-wrong-color=2e3440CC
+ring-wrong-color=bf616a
+text-wrong-color=bf616a
+
+# Caps Lock
+inside-caps-lock-color=2e3440CC
+ring-caps-lock-color=d08770
+caps-lock-key-hl-color=d08770
+caps-lock-bs-hl-color=bf616a
