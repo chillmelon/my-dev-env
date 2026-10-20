@@ -23,6 +23,6 @@ border-color=#4c566a
 border-color=#bf616a
 default-timeout=0
 
-# Click a Telegram notification: bring Telegram to the current workspace
+# Click a Telegram notification: jump to Telegram's workspace (3)
 [app-name="Telegram Desktop"]
 on-button-left=exec ~/.config/sway/scripts/telegram.sh summon "$id"
