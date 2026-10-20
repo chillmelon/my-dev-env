@@ -1,7 +1,11 @@
 #!/bin/sh
-# telegram.sh summon <mako-id>
-#   Open a Telegram notification and make sure the Telegram main window ends up on the
-#   workspace you are on right now - also when the window was closed to the tray.
+# telegram.sh focus
+#   swaync: run by the "telegram-focus" script (run-on: action) after swaync has already
+#   invoked the notification's action; just switch to the Telegram main window.
+# telegram.sh summon <mako-id>   (legacy, mako only)
+#   Open a Telegram notification and switch to the workspace the Telegram main window is on.
+#   Telegram re-maps its window on activation; the for_window rule in 50-rules.conf pins it to
+#   workspace 3, and focusing it here switches to that workspace.
 # Criteria cover both native Wayland (app_id) and XWayland (class); the non-matching one is a harmless no-op.
 NOT_VIEWER='title="^(?!Media viewer$)"'
 
@@ -16,17 +20,23 @@ main_exists() {
         | select(.name != "Media viewer")] | length > 0' >/dev/null
 }
 
-case "$1" in
-summon)
-    ws=$(swaymsg -t get_workspaces | jq -r '.[] | select(.focused) | .name')
-    makoctl invoke -n "$2"
-    makoctl dismiss -n "$2" 2>/dev/null
+focus_main() {
     # Telegram (re)shows its window asynchronously; wait up to ~3s for it.
     i=0
     while ! main_exists && [ $i -lt 30 ]; do sleep 0.1; i=$((i + 1)); done
     sleep 0.2
-    each "$NOT_VIEWER" "move container to workspace \"$ws\""
-    swaymsg "workspace \"$ws\"" >/dev/null
     each "$NOT_VIEWER" "focus"
+}
+
+case "$1" in
+focus)
+    focus_main
+    ;;
+summon)
+    makoctl invoke -n "$2"
+    makoctl dismiss -n "$2" 2>/dev/null
+    focus_main
     ;;
 esac
+# swaync reports a non-zero exit as a failure notification; a non-matching criterion is not one.
+exit 0
