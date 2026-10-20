@@ -15,7 +15,7 @@ ohmyzsh/ohmyzsh path:plugins/fzf
 #   with prompt plugins, remember to add this to your .zshrc:
 #   `autoload -Uz promptinit && promptinit && prompt pure`
 # sindresorhus/pure
-romkatv/powerlevel10k
+# romkatv/powerlevel10k
 
 # popular fish-like plugins
 zsh-users/zsh-autosuggestions
