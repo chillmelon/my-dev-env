@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Interactively create a git worktree next to the project:
+#   1. pick a project under ~/work with fzf (like tmux-sessionizer)
+#   2. prompt for a branch name
+#   3. create worktree at ~/work/{project}@{branch with / -> -}
+#   4. copy vendor/ and .env from the project into the worktree
+#   5. open a tmux session for the worktree (via tmux-sessionizer)
+set -euo pipefail
+
+# --- 1. pick project (main repos only; worktrees have a .git *file*) --------
+selected=$(find ~/work -maxdepth 1 -mindepth 1 -type d \
+    -exec test -d '{}/.git' \; -print | fzf --prompt="project> " || true)
+[[ -z "$selected" ]] && exit 0
+
+git_() { git -C "$selected" "$@"; }
+
+# --- 2. pick existing branch or type a new one ------------------------------
+# Lines are "<branch>\t<source>"; branches already checked out in some
+# worktree are hidden since git can't check them out twice.
+list_branches() {
+    local checked_out
+    checked_out=$(git_ worktree list --porcelain | sed -n 's|^branch refs/heads/||p')
+    {
+        git_ for-each-ref --format='%(refname:short)%09local' refs/heads
+        git_ for-each-ref --format='%(refname:lstrip=3)%09%(refname:lstrip=2)' refs/remotes \
+            | awk -F'\t' '$1 != "HEAD" && $1 != ""'
+    } | awk -F'\t' -v co="$checked_out" '
+        BEGIN { n = split(co, a, "\n"); for (i = 1; i <= n; i++) skip[a[i]] = 1 }
+        !($1 in skip) && !seen[$1]++'   # local listed first, so it wins over remote
+}
+
+# Enter: pick the highlighted branch, or use the typed text if nothing matches.
+# Alt-Enter: always use the typed text (new branch even if it fuzzy-matches).
+branch=$(list_branches | fzf \
+    --prompt="branch> " \
+    --delimiter=$'\t' --tabstop=40 \
+    --header="Enter: select / create if no match · Alt-Enter: create typed name" \
+    --bind 'enter:accept-or-print-query,alt-enter:print-query' || true)
+branch="${branch%%$'\t'*}"
+branch="${branch#"${branch%%[![:space:]]*}"}"   # trim leading spaces
+branch="${branch%"${branch##*[![:space:]]}"}"   # trim trailing spaces
+[[ -z "$branch" ]] && exit 0
+
+if ! git_ check-ref-format --branch "$branch" >/dev/null 2>&1; then
+    echo "Invalid branch name: $branch" >&2
+    exit 1
+fi
+
+worktree_path="$(dirname "$selected")/$(basename "$selected")@${branch//\//-}"
+
+if [[ -e "$worktree_path" ]]; then
+    echo "Already exists: $worktree_path" >&2
+    exit 1
+fi
+
+# --- 3. create worktree -----------------------------------------------------
+if git_ show-ref --verify --quiet "refs/heads/$branch"; then
+    echo "Using existing local branch '$branch'"
+    git_ worktree add "$worktree_path" "$branch"
+elif remote_ref=$(git_ for-each-ref --format='%(refname:short)' "refs/remotes/*/$branch" | head -n1) \
+    && [[ -n "$remote_ref" ]]; then
+    echo "Tracking remote branch '$remote_ref'"
+    git_ worktree add --track -b "$branch" "$worktree_path" "$remote_ref"
+else
+    current=$(git_ rev-parse --abbrev-ref HEAD)
+    read -rp "Base ref for new branch [$current]: " base
+    base="${base:-$current}"
+    git_ worktree add -b "$branch" "$worktree_path" "$base"
+fi
+
+# --- 4. copy untracked essentials -------------------------------------------
+# vendor/ must be a real copy, not a symlink: Composer's autoloader derives the
+# project root from vendor's real path, so a symlink would load App\ classes
+# from the main project instead of the worktree.
+if [[ -d "$selected/vendor" && ! -e "$worktree_path/vendor" ]]; then
+    echo "Copying vendor/ ..."
+    cp -a --reflink=auto "$selected/vendor" "$worktree_path/vendor"
+fi
+
+if [[ -f "$selected/.env" && ! -e "$worktree_path/.env" ]]; then
+    cp -a "$selected/.env" "$worktree_path/.env"
+    echo "Copied .env"
+fi
+
+echo
+echo "Worktree ready: $worktree_path"
+
+# --- 5. open tmux session ---------------------------------------------------
+exec "$(dirname "$(readlink -f "$0")")/tmux-sessionizer" "$worktree_path"

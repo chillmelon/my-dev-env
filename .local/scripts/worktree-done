@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Finish work in a git worktree created by worktree-add:
+#   1. verify we're in a linked worktree (not the main repo) and it's clean
+#   2. git worktree remove (the branch is kept)
+#   3. switch tmux to the main project's session
+#   4. kill the worktree's tmux session
+#
+# Run from anywhere inside the worktree. --force skips the clean check.
+set -euo pipefail
+
+force=0
+[[ "${1:-}" == "--force" || "${1:-}" == "-f" ]] && force=1
+
+die() { echo "$*" >&2; exit 1; }
+
+# --- 1. locate worktree and main repo ---------------------------------------
+worktree=$(git rev-parse --show-toplevel 2>/dev/null) || die "Not inside a git repository."
+common_dir=$(git rev-parse --path-format=absolute --git-common-dir)
+main=$(dirname "$common_dir")
+[[ "$worktree" == "$main" ]] && die "This is the main repo ($main), not a worktree."
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if (( !force )) && [[ -n "$(git status --porcelain)" ]]; then
+    echo "Worktree has uncommitted changes:" >&2
+    git status --short >&2
+    die $'\nCommit/stash them, or rerun with --force.'
+fi
+
+read -rp "Remove worktree $worktree (branch '$branch' is kept)? [y/N] " ans
+[[ "$ans" == [yY]* ]] || exit 0
+
+# --- 2. remove worktree -----------------------------------------------------
+cd "$main"
+if (( force )); then
+    git worktree remove --force "$worktree"
+else
+    git worktree remove "$worktree"
+fi
+echo "Removed $worktree (branch '$branch' kept)"
+
+# --- 3 & 4. tmux: go to main session, then kill the worktree session ---------
+# Kill last: if this script runs in a pane of that session, it dies with it.
+session_name() { basename "$1" | tr ".,: " "____"; }
+wt_session=$(session_name "$worktree")
+
+if [[ -n "${TMUX:-}" ]]; then
+    "$(dirname "$(readlink -f "$0")")/tmux-sessionizer" "$main"
+fi
+if tmux has-session -t="$wt_session" 2>/dev/null; then
+    tmux kill-session -t="$wt_session"
+fi
