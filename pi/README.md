@@ -8,11 +8,11 @@
 - `agent/keybindings.json`、`agent/APPEND_SYSTEM.md`：快捷鍵與附加指令。
 - `agent/extensions/`：本機 extension 設定，目前為 RTK optimizer 設定。
 - `agent/prompts/`：自訂 prompt。
-- `agent/skills/`：29 個本機 skills。原本指向 `~/.agents/skills/` 的連結已轉為實際檔案，不依賴原機路徑。
-- `packages.txt`：11 個啟用套件的頂層版本／Git commit，按原設定順序記錄。
+- `agent/skills/`：31 個本機 skills。原本指向 `~/.agents/skills/` 的連結已轉為實際檔案，不依賴原機路徑。
+- `packages.txt`：12 個啟用套件的頂層版本／Git commit，按原設定順序記錄。
 - `patches/pi-codemapper.patch`：已安裝 CodeMapper 套件中尚未提交的 5 個檔案修改，相對於記錄的 commit。
 
-快照使用 Pi **0.86.1**、Node.js **24.19.0**。`settings.json` 保持原樣，因此套件來源本身未鎖版；以下還原步驟使用 `packages.txt` 安裝指定版本，會讓還原後的 settings 記錄鎖版來源。
+快照使用 Pi **0.87.1**、Node.js **26.10.0**。`settings.json` 保持原樣，因此套件來源本身未鎖版；以下還原步驟使用 `packages.txt` 安裝指定版本，會讓還原後的 settings 記錄鎖版來源。
 
 ### 不包含
 
@@ -41,7 +41,7 @@
     exit 1
   fi
 
-  npm install -g --ignore-scripts @earendil-works/pi-coding-agent@0.86.1
+  npm install -g --ignore-scripts @earendil-works/pi-coding-agent@0.87.1
   mkdir -p "$target"
   cp -a "$snapshot/agent/." "$target/"
   export PI_CODING_AGENT_DIR="$target"
