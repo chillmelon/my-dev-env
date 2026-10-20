@@ -52,5 +52,6 @@ copy_file() {
 
 copy_file env/.zshrc $HOME
 copy_file env/.zsh_plugins.txt $HOME
+copy_file .config/starship.toml $HOME/.config
 
 log "--------- dev-env ---------"
