@@ -11,19 +11,25 @@
 @define-color yellow #ebcb8b;
 
 * {
-    font-family: "BlexMono Nerd Font Propo", monospace;
+    font-family: "BlexMono Nerd Font", monospace;
     font-size: 13px;
+    /* Plex Mono Regular stems are <1px at 13px on a ~92 DPI panel and smear
+       across two pixels; Medium lands them on whole pixels. */
+    font-weight: 500;
     min-height: 0;
     border: none;
     border-radius: 0;
 }
 
+/* Floating square panel styled as an unfocused sway window:
+   2px border = `default_border pixel 2`, colour = client.unfocused ($surface) */
 window#waybar {
     background: @nord0;
     color: @nord4;
+    border: 2px solid @nord1;
 }
 
-/* Workspaces: no filled blocks, just a thin frost underline on the active one */
+/* Workspaces: focused = solid frost block, same as sway's client.focused title */
 #workspaces button {
     padding: 0 10px;
     color: @nord3;
@@ -39,12 +45,14 @@ window#waybar {
     color: @nord4;
 }
 #workspaces button.focused {
-    color: @nord6;
-    box-shadow: inset 0 -2px @frost;
+    color: @nord0;
+    background: @frost;
+    box-shadow: none;
 }
 #workspaces button.urgent {
-    color: @red;
-    box-shadow: inset 0 -2px @red;
+    color: @nord0;
+    background: @red;
+    box-shadow: none;
 }
 
 #mode {
@@ -66,9 +74,22 @@ window#waybar {
 #clock      { color: @nord6; }
 #scratchpad { color: @nord3; }
 
+/* Thin dividers between groups, echoing sway's tile borders:
+   [scratchpad] ... [cpu mem] | [network] | [audio] | [power] */
+#scratchpad,
+#cpu,
+#network,
+#pulseaudio,
 #custom-power {
-    padding: 0 14px 0 10px;
-    color: @nord4;
+    border-left: 1px solid @nord1;
+}
+/* cpu+mem read as one group */
+#cpu    { padding-right: 6px; }
+#memory { padding-left: 6px; }
+
+#custom-power {
+    padding: 0 14px 0 12px;
+    color: @frost;
 }
 #custom-power:hover { color: @red; }
 

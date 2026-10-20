@@ -1,7 +1,12 @@
 {
     "layer": "top",
+    // Icon colour #88c0d0 = frost in style.css (Pango markup can't use @define-color)
     "position": "top",
     "height": 30,
+    // Float like a sway tile: inset = sway `gaps inner 8`
+    "margin-top": 8,
+    "margin-left": 8,
+    "margin-right": 8,
     "spacing": 4,
 
     "modules-left": ["sway/workspaces", "sway/mode", "sway/scratchpad"],
@@ -34,25 +39,25 @@
     },
 
     "cpu": {
-        "format": "cpu {usage}%",
+        "format": "<span color='#88c0d0'>󰻠</span> {usage}%",
         "interval": 5,
         "states": { "warning": 70, "critical": 90 }
     },
     "memory": {
-        "format": "mem {percentage}%",
+        "format": "<span color='#88c0d0'>󰍛</span> {percentage}%",
         "states": { "warning": 75, "critical": 90 },
         "tooltip-format": "{used:0.1f} / {total:0.1f} GiB",
         "interval": 5
     },
     "network": {
-        "format-wifi": "󰤨 {essid}",
-        "format-ethernet": "󰈀 {ipaddr}",
+        "format-wifi": "<span color='#88c0d0'>󰤨</span> {essid}",
+        "format-ethernet": "<span color='#88c0d0'>󰈀</span> {ipaddr}",
         "format-disconnected": "󰤭 離線",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr}\n {bandwidthUpBytes}   {bandwidthDownBytes}",
         "on-click": "nm-connection-editor"
     },
     "pulseaudio": {
-        "format": "{icon} {volume}%",
+        "format": "<span color='#88c0d0'>{icon}</span> {volume}%",
         "format-muted": "󰝟 靜音",
         "format-icons": { "default": ["󰕿", "󰖀", "󰕾"] },
         "on-click": "pavucontrol",
