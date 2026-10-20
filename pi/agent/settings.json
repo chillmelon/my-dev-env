@@ -1,9 +1,9 @@
 {
   "quietStartup": true,
-  "lastChangelogVersion": "0.86.1",
+  "lastChangelogVersion": "0.87.1",
   "theme": "dark",
   "defaultProvider": "anthropic",
-  "defaultModel": "claude-sonnet-5",
+  "defaultModel": "claude-opus-5-5",
   "defaultThinkingLevel": "high",
   "compaction": {
     "enabled": false,
@@ -20,7 +20,8 @@
     "npm:pi-zentui",
     "git:git@github.com:elpapi42/pi-codemapper.git",
     "npm:pi-provider-kimi-code",
-    "git:github.com/obra/superpowers"
+    "git:github.com/obra/superpowers",
+    "npm:@micka33/pi-karpathy-skill"
   ],
   "observational-memory": {
     "observeAfterTokens": 10000,
@@ -58,12 +59,12 @@
       },
       "deep": {
         "provider": "anthropic",
-        "id": "claude-opus-5",
+        "id": "claude-opus-5.5",
         "thinking": "medium"
       }
     }
   },
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "warnings": {
     "anthropicExtraUsage": false
   }

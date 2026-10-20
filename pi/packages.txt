@@ -9,3 +9,4 @@ npm:pi-zentui@0.25.0
 git:git@github.com:elpapi42/pi-codemapper.git@a9d9b66acae61fd77acdb05ee31c122eda26b993
 npm:pi-provider-kimi-code@0.6.12
 git:github.com/obra/superpowers@5bf4e78011075bcfc0dc295f0724994cd123ee71
+npm:@micka33/pi-karpathy-skill@2.0.1
