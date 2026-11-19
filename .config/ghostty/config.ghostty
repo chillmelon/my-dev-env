@@ -7,3 +7,5 @@ window-title-font-family = BlexMono Nerd Font Mono
 
 # Translucent background (text stays opaque). Sway has no blur; for blur see SwayFX.
 background-opacity = 0.88
+shell-integration-features = ssh-env,ssh-terminfo
+
