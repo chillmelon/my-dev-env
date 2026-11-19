@@ -8,7 +8,7 @@ ohmyzsh/ohmyzsh path:plugins/gem
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/npm
 ohmyzsh/ohmyzsh path:plugins/tmux
-ohmyzsh/ohmyzsh path:plugins/yarn
+# ohmyzsh/ohmyzsh path:plugins/yarn  # disabled: its `ya` alias shadows yazi's `ya`
 ohmyzsh/ohmyzsh path:plugins/fzf
 
 # prompts:

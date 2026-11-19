@@ -26,10 +26,8 @@ bindkey -e
 
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
-# NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# fnm (Node version manager, replaces nvm)
+eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell zsh)"
 
 # export PATH="/home/chiyu/miniconda3/bin:$PATH"  # commented out by conda initialize
 
@@ -61,6 +59,11 @@ unset __conda_setup
 #
 eval "$(zoxide init zsh)"
 
+# load SSH agent
+if [ -z "$SSH_AUTH_SOCK" ]; then
+ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/openssh_agent"
+fi
+
 
 # pnpm
 export PNPM_HOME="/Users/yoyo/Library/pnpm"
@@ -74,3 +77,21 @@ export PATH="/home/chiyu/.config/herd-lite/bin:$PATH"
 export PHP_INI_SCAN_DIR="/home/chiyu/.config/herd-lite/bin:$PHP_INI_SCAN_DIR"
 
 eval "$(starship init zsh)"
+
+# herdr: 不帶參數時，attach 到「目前目錄」的 workspace（沒有就建立），類似 tmux new -A
+herdr() {
+    if (( $# )) || [[ -n "$HERDR_ENV" ]]; then
+        command herdr "$@"; return
+    fi
+    if command herdr session list --json 2>/dev/null | jq -e '.sessions[] | select(.default and .running)' >/dev/null; then
+        local ws
+        ws=$(command herdr pane list 2>/dev/null \
+            | jq -r --arg d "$PWD" '[.result.panes[] | select(.cwd == $d)][0].workspace_id // empty')
+        if [[ -n "$ws" ]]; then
+            command herdr workspace focus "$ws" >/dev/null
+        else
+            command herdr workspace create --cwd "$PWD" --label "${PWD:t}" --focus >/dev/null
+        fi
+    fi
+    command herdr
+}
