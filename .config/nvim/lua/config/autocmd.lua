@@ -44,6 +44,26 @@ autocmd('LspAttach', {
   end,
 })
 
+-- Convert Windows line endings (CRLF) to Unix (LF) on save
+autocmd('BufWritePre', {
+  group = augroup('StripCRLF', { clear = true }),
+  pattern = '*',
+  callback = function(event)
+    local bo = vim.bo[event.buf]
+    if bo.buftype ~= '' or bo.binary or not bo.modifiable then
+      return
+    end
+    -- Whole file detected as dos
+    if bo.fileformat ~= 'unix' then
+      bo.fileformat = 'unix'
+    end
+    -- Stray ^M at line ends (mixed line endings)
+    local view = vim.fn.winsaveview()
+    vim.cmd [[keepjumps keeppatterns silent! %s/\r$//e]]
+    vim.fn.winrestview(view)
+  end,
+})
+
 autocmd('BufNewFile', {
   pattern = '*/diary/*.md',
   command = '0r ~/vaults/03 templates/diary.md',

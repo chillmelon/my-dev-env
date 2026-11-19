@@ -28,6 +28,7 @@ return {
         'pyright',
         'ts_ls',
         'lua_ls',
+        'intelephense',
       },
     },
   },
