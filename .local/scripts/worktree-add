@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Interactively create a git worktree next to the project:
 #   1. pick a project under ~/work with fzf (like tmux-sessionizer)
-#   2. prompt for a branch name
+#   2. fetch origin, then pick/type a branch name (new branches default to
+#      origin/main, or origin/main-merge when the *-merge pair exists)
 #   3. create worktree at ~/work/{project}@{branch with / -> -}
-#   4. copy vendor/ and .env from the project into the worktree
+#   4. copy vendor/ and .env from the project into the worktree, and symlink
+#      docs/ (if it's untracked) so notes are shared with the main project
 #   5. open a tmux session for the worktree (via tmux-sessionizer)
+# If the branch already has a worktree, skip 3-4 and just open/attach its
+# tmux session.
 set -euo pipefail
 
 # --- 1. pick project (main repos only; worktrees have a .git *file*) --------
@@ -14,20 +18,48 @@ selected=$(find ~/work -maxdepth 1 -mindepth 1 -type d \
 
 git_() { git -C "$selected" "$@"; }
 
+# Refresh remote refs so the branch list and default base aren't stale.
+# Non-fatal: offline still works with the cached refs.
+if git_ remote get-url origin >/dev/null 2>&1; then
+    git_ fetch --quiet --prune origin 2>/dev/null \
+        || echo "warning: fetch origin failed; using cached remote refs" >&2
+fi
+
+# Default base for new branches: the production line, never whatever the main
+# repo happens to have checked out (a branch cut from develop would ship
+# develop-only code in its main PR). Same pair detection as git-to-develop.
+remote_has() { git_ show-ref --verify --quiet "refs/remotes/$1"; }
+default_base() {
+    if remote_has origin/main-merge && remote_has origin/develop-merge; then
+        echo origin/main-merge; return
+    fi
+    local r
+    for r in origin/main origin/master; do
+        remote_has "$r" && { echo "$r"; return; }
+    done
+    git_ rev-parse --abbrev-ref HEAD
+}
+
 # --- 2. pick existing branch or type a new one ------------------------------
 # Lines are "<branch>\t<source>"; branches already checked out in some
-# worktree are hidden since git can't check them out twice.
+# worktree are labelled "worktree" (selecting one jumps to its session).
 list_branches() {
-    local checked_out
-    checked_out=$(git_ worktree list --porcelain | sed -n 's|^branch refs/heads/||p')
     {
+        git_ worktree list --porcelain | sed -n 's|^branch refs/heads/\(.*\)|\1\tworktree|p'
         git_ for-each-ref --format='%(refname:short)%09local' refs/heads
         git_ for-each-ref --format='%(refname:lstrip=3)%09%(refname:lstrip=2)' refs/remotes \
             | awk -F'\t' '$1 != "HEAD" && $1 != ""'
-    } | awk -F'\t' -v co="$checked_out" '
-        BEGIN { n = split(co, a, "\n"); for (i = 1; i <= n; i++) skip[a[i]] = 1 }
-        !($1 in skip) && !seen[$1]++'   # local listed first, so it wins over remote
+    } | awk -F'\t' '!seen[$1]++'   # worktree > local > remote
 }
+
+# Print the path of the worktree that has <branch> checked out, if any.
+worktree_for_branch() {
+    git_ worktree list --porcelain | awk -v ref="refs/heads/$1" '
+        /^worktree / { path = substr($0, 10) }
+        $0 == "branch " ref { print path; exit }'
+}
+
+sessionizer="$(dirname "$(readlink -f "$0")")/tmux-sessionizer"
 
 # Enter: pick the highlighted branch, or use the typed text if nothing matches.
 # Alt-Enter: always use the typed text (new branch even if it fuzzy-matches).
@@ -48,8 +80,20 @@ fi
 
 worktree_path="$(dirname "$selected")/$(basename "$selected")@${branch//\//-}"
 
+# --- existing worktree: just open / attach its tmux session -----------------
+existing=$(worktree_for_branch "$branch")
+if [[ -n "$existing" && ! -d "$existing" ]]; then
+    # Directory was deleted by hand: drop the stale record and recreate below.
+    echo "Pruning stale worktree record: $existing"
+    git_ worktree prune
+    existing=""
+fi
+if [[ -n "$existing" ]]; then
+    exec "$sessionizer" "$existing"
+fi
+
 if [[ -e "$worktree_path" ]]; then
-    echo "Already exists: $worktree_path" >&2
+    echo "Already exists (not a worktree of '$branch'): $worktree_path" >&2
     exit 1
 fi
 
@@ -62,10 +106,12 @@ elif remote_ref=$(git_ for-each-ref --format='%(refname:short)' "refs/remotes/*/
     echo "Tracking remote branch '$remote_ref'"
     git_ worktree add --track -b "$branch" "$worktree_path" "$remote_ref"
 else
-    current=$(git_ rev-parse --abbrev-ref HEAD)
-    read -rp "Base ref for new branch [$current]: " base
-    base="${base:-$current}"
-    git_ worktree add -b "$branch" "$worktree_path" "$base"
+    default=$(default_base)
+    read -rp "Base ref for new branch [$default]: " base
+    base="${base:-$default}"
+    # --no-track: don't make origin/main the upstream of a feature branch
+    # (push would target main); set the upstream on first push instead.
+    git_ worktree add --no-track -b "$branch" "$worktree_path" "$base"
 fi
 
 # --- 4. copy untracked essentials -------------------------------------------
@@ -82,8 +128,15 @@ if [[ -f "$selected/.env" && ! -e "$worktree_path/.env" ]]; then
     echo "Copied .env"
 fi
 
+# docs/ is symlinked (shared, not copied) so notes written in any worktree land
+# in the main project. Skipped when docs/ is tracked: checkout already made it.
+if [[ -d "$selected/docs" && ! -e "$worktree_path/docs" && ! -L "$worktree_path/docs" ]]; then
+    ln -s "$selected/docs" "$worktree_path/docs"
+    echo "Symlinked docs/ -> $selected/docs"
+fi
+
 echo
 echo "Worktree ready: $worktree_path"
 
 # --- 5. open tmux session ---------------------------------------------------
-exec "$(dirname "$(readlink -f "$0")")/tmux-sessionizer" "$worktree_path"
+exec "$sessionizer" "$worktree_path"

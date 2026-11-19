@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# fzf session switcher for tmux (bound to prefix s in a popup).
+#   Enter   switch to the selected session
+#   Ctrl-x  kill the selected session and refresh the list
+# The current session is not listed: killing it would detach the client
+# (detach-on-destroy on).
+set -euo pipefail
+
+current=$(tmux display-message -p '#S')
+list="tmux list-sessions -F '#{session_name}' | grep -vxF -- '$current' || true"
+
+selected=$(bash -c "$list" | fzf --reverse \
+    --prompt='switch> ' \
+    --header='Enter: switch · Ctrl-x: kill session' \
+    --preview 'tmux capture-pane -ep -t {}' --preview-window=right,60% \
+    --bind "ctrl-x:execute-silent(tmux kill-session -t={})+reload($list)" \
+    || true)
+
+[[ -n "$selected" ]] && tmux switch-client -t="$selected"
+exit 0

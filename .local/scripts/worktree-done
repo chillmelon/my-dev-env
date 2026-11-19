@@ -21,9 +21,19 @@ main=$(dirname "$common_dir")
 
 branch=$(git rev-parse --abbrev-ref HEAD)
 
-if (( !force )) && [[ -n "$(git status --porcelain)" ]]; then
+# docs/ symlink created by worktree-add: not a real change, so ignore it in the
+# clean check (matters when docs/ isn't gitignored) and remove it before
+# `git worktree remove`. Only the link is removed, never the target.
+docs_link=0
+if [[ -L "$worktree/docs" && "$(readlink "$worktree/docs")" == "$main/docs" ]]; then
+    docs_link=1
+fi
+status_args=(--porcelain --)
+(( docs_link )) && status_args+=(":(top,exclude)docs")
+
+if (( !force )) && [[ -n "$(git -C "$worktree" status "${status_args[@]}")" ]]; then
     echo "Worktree has uncommitted changes:" >&2
-    git status --short >&2
+    git -C "$worktree" status --short "${status_args[@]:1}" >&2
     die $'\nCommit/stash them, or rerun with --force.'
 fi
 
@@ -31,6 +41,7 @@ read -rp "Remove worktree $worktree (branch '$branch' is kept)? [y/N] " ans
 [[ "$ans" == [yY]* ]] || exit 0
 
 # --- 2. remove worktree -----------------------------------------------------
+(( docs_link )) && rm "$worktree/docs"
 cd "$main"
 if (( force )); then
     git worktree remove --force "$worktree"

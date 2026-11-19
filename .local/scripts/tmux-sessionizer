@@ -1,17 +1,44 @@
 #!/usr/bin/env bash
 # Create or switch to a tmux session for a directory.
-#   tmux-sessionizer          pick a directory under ~/work with fzf
+#   tmux-sessionizer          pick with fzf: existing sessions first, then
+#                             directories under ~/work, then zoxide history
 #   tmux-sessionizer <path>   use <path> directly
+#
+# New sessions get a fixed layout: windows "edit", "agent", "sh".
+# Session name = basename with ".,: " -> "_" (worktree-done relies on this).
+
+session_name() { basename "$1" | tr ".,: " "____"; }
+
+candidates() {
+    local current sessions
+    current=$(tmux display-message -p '#S' 2>/dev/null)
+    sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+    # existing sessions (except the current one), marked with "[s] "
+    [[ -n "$sessions" ]] && grep -vxF -- "${current:-}" <<<"$sessions" | sed 's/^/[s] /'
+    # directories without a session yet; ~/work first, then zoxide.
+    # Same name mapping as session_name(), done in awk to avoid a fork per dir.
+    {
+        find ~/work -maxdepth 1 -mindepth 1 -type d
+        command -v zoxide >/dev/null && zoxide query -l 2>/dev/null
+    } | awk -v sessions="$sessions" '
+        BEGIN { n = split(sessions, s, "\n"); for (i = 1; i <= n; i++) has[s[i]] = 1 }
+        seen[$0]++ { next }
+        { name = $0; sub(".*/", "", name); gsub(/[.,: ]/, "_", name)
+          if (!(name in has)) print }'
+}
 
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find ~/work -maxdepth 1 -mindepth 1 -type d | fzf)
+    selected=$(candidates | fzf --reverse --prompt="session> ")
 fi
-if [[ -z "$selected" ]]; then
-    exit 0
+[[ -z "$selected" ]] && exit 0
+
+if [[ "$selected" == "[s] "* ]]; then
+    selected_name=${selected#"[s] "}
+else
+    selected_name=$(session_name "$selected")
 fi
-selected_name=$(basename "$selected" | tr ".,: " "____")
 
 switch_to() {
     if [[ -z "$TMUX" ]]; then
@@ -21,9 +48,10 @@ switch_to() {
     fi
 }
 
-if tmux has-session -t="$selected_name" 2>/dev/null; then
-    switch_to
-else
-    tmux new-session -ds "$selected_name" -c "$selected"
-    switch_to
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected" -n edit
+    tmux new-window  -dt "$selected_name:" -c "$selected" -n agent
+    tmux new-window  -dt "$selected_name:" -c "$selected" -n sh
+    tmux select-window -t "$selected_name:edit"
 fi
+switch_to
